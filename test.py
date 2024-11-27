@@ -23,6 +23,7 @@ while True:
 
     time.sleep(0.3)
     # Checking if the player is still alive
+    break
     if terminated:
         break
 

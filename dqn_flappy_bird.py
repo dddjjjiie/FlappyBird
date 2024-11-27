@@ -23,9 +23,9 @@ LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1000
 REPLAY_START_SIZE = 10000
 
-EPSILON_DECAY_LAST_FRAME = 10**5
+EPSILON_DECAY_LAST_FRAME = 100**5
 EPSILON_START = 1.0
-EPSILON_FINAL = 0.02
+EPSILON_FINAL = 0.2
 
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
 
@@ -167,4 +167,6 @@ if __name__ == "__main__":
         loss_t = calc_loss(batch, net, tgt_net, device=device)
         loss_t.backward()
         optimizer.step()
+
+        writer.add_scalar("loss", loss_t, frame_idx)
     writer.close()
