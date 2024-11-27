@@ -1,0 +1,2 @@
+from flappy_bird_env.envs.flappy_bird_env_rgb import FlappyBirdEnvRGB
+from flappy_bird_env.envs.flappy_bird_env_simple import FlappyBirdEnvSimple
