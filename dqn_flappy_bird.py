@@ -100,13 +100,12 @@ def calc_loss(batch, net, tgt_net, device="cpu"):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
     parser.add_argument("--env", default=DEFAULT_ENV_NAME,
                         help="Name of the environment, default=" + DEFAULT_ENV_NAME)
     parser.add_argument("--reward", type=float, default=MEAN_REWARD_BOUND,
                         help="Mean reward boundary for stop of training, default=%.2f" % MEAN_REWARD_BOUND)
     args = parser.parse_args()
-    device = torch.device("cuda" if args.cuda else "cpu")
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     env = wrappers.make_env(args.env)
     observation, _ = env.reset()
