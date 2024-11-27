@@ -3,11 +3,8 @@ import gymnasium as gym
 import numpy as np
 import collections
 
-from torch.utils.tensorboard import SummaryWriter
-from urllib3.filepost import writer
-
 from flappy_bird_env.envs.flappy_bird_env_rgb import FlappyBirdEnvRGB
-writer = SummaryWriter()
+
 class FireResetEnv(gym.Wrapper):
     def __init__(self, env=None):
         """For environments where the user need to press FIRE for the game to start."""
@@ -56,7 +53,6 @@ class MaxAndSkipEnv(gym.Wrapper):
         self._obs_buffer.append(obs)
         return obs
 
-
 class ProcessFrame84(gym.ObservationWrapper):
     def __init__(self, env=None):
         super(ProcessFrame84, self).__init__(env)
@@ -68,7 +64,7 @@ class ProcessFrame84(gym.ObservationWrapper):
     @staticmethod
     def process(frame): # 将图像大小转为1*84*84
         frame = frame.transpose(2, 1, 0) # WHC -> CHW
-        writer.add_image("img", frame)
+
         if frame.size == 288 * 512 * 3:
             img = frame.astype(np.float32)
         else:
@@ -76,11 +72,10 @@ class ProcessFrame84(gym.ObservationWrapper):
 
         img = img[0, :, :] * 0.299 + img[1, :, :] * 0.587 + img[2, :, :] * 0.114
         img = img.astype(np.uint8)
-        writer.add_image("grey", img.reshape(1, img.shape[0], img.shape[1]))
+
         resized_screen = cv2.resize(img, (84, 110), interpolation=cv2.INTER_AREA)
         x_t = resized_screen[:84, :]
         x_t = np.reshape(x_t, [1, x_t.shape[0], x_t.shape[1]])
-        writer.add_image("resize", x_t)
         return x_t.astype(np.uint8)
 
 

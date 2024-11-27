@@ -74,7 +74,7 @@ class Agent:
         exp = Experience(self.state, action, reward, is_done, new_state)
         self.exp_buffer.append(exp)
         self.state = new_state
-        self.env.render()
+        # self.env.render()
         if is_done:
             done_reward = self.total_reward
             self._reset()
@@ -113,9 +113,10 @@ if __name__ == "__main__":
 
     net = dqn.DQN(env.observation_space.shape, env.action_space.n).to(device)
     tgt_net = dqn.DQN(env.observation_space.shape, env.action_space.n).to(device)
-    writer = SummaryWriter(comment="-" + args.env)
+
     print(net)
 
+    writer = SummaryWriter()
 
     buffer = ExperienceBuffer(REPLAY_SIZE)
     agent = Agent(env, buffer)
@@ -123,7 +124,8 @@ if __name__ == "__main__":
 
     optimizer = optim.Adam(net.parameters(), lr=LEARNING_RATE)
     total_rewards = []
-    frame_idx = 0 # 当前帧的索引
+
+    frame_idx = 0  # 当前帧的索引
     ts_frame = 0 # 当前帧的时间索引
     ts = time.time() # 当前状态的时间
     best_mean_reward = None
