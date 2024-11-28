@@ -109,12 +109,22 @@ class FlappyBirdEnvRGB(gym.Env):
                   otherwise);
                 * an info dictionary.
         """
+        score_start = self._game.score
         alive = self._game.update_state(action)
+        score_end = self._game.score
+        score = score_end - score_start
+
         obs = self._get_observation()
 
-        reward = 1
+        reward = 0.001
 
         done = not alive
+
+        if done:
+            reward = -10
+        elif score > 0:
+            reward = 1
+
         info = {"score": self._game.score}
 
         return obs, reward, done, False, info
