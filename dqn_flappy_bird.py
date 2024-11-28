@@ -24,9 +24,9 @@ LEARNING_RATE = 1e-4
 SYNC_TARGET_FRAMES = 1000
 REPLAY_START_SIZE = 10000
 
-EPSILON_DECAY_LAST_FRAME = 100**5
+EPSILON_DECAY_LAST_FRAME = 5*10**5
 EPSILON_START = 1.0
-EPSILON_FINAL = 0.2
+EPSILON_FINAL = 0.01
 
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
 
