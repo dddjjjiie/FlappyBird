@@ -16,14 +16,13 @@ while True:
     print(obs.shape, type(obs))
     # Next action:
     # (feed the observation to your agent here)
-    action = np.random.choice((0, 1), p=[0.9, 0.1])
+    action = np.random.choice((0, 1), p=[0.8, 0.2])
 
     # Processing:
     obs, reward, terminated, _, info = env.step(action)
 
     time.sleep(0.3)
     # Checking if the player is still alive
-    break
     if terminated:
         break
 

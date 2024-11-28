@@ -131,6 +131,21 @@ class FlappyBirdLogic:
              "y": new_pipe2[1]["y"]},
         ]
 
+        # self.upper_pipes = [
+        #     {"x": self._screen_width + 50,
+        #      "y": new_pipe1[0]["y"]},
+        #     {"x": self._screen_width + 50 + 150,
+        #      "y": new_pipe2[0]["y"]},
+        # ]
+        #
+        # # List of lower pipes:
+        # self.lower_pipes = [
+        #     {"x": self._screen_width + 50,
+        #      "y": new_pipe1[1]["y"]},
+        #     {"x": self._screen_width + 50 + 150,
+        #      "y": new_pipe2[1]["y"]},
+        # ]
+
         # Player's info:
         self.player_vel_y = -9  # player"s velocity along Y
         self.player_rot = 45  # player"s rotation

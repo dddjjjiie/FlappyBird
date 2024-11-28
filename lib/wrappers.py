@@ -3,8 +3,11 @@ import gymnasium as gym
 import numpy as np
 import collections
 
-from flappy_bird_env.envs.flappy_bird_env_rgb import FlappyBirdEnvRGB
+from torch.utils.tensorboard import SummaryWriter
 
+from flappy_bird_env.envs.flappy_bird_env_rgb import FlappyBirdEnvRGB
+writer = SummaryWriter()
+cnt = 0
 class FireResetEnv(gym.Wrapper):
     def __init__(self, env=None):
         """For environments where the user need to press FIRE for the game to start."""
@@ -35,23 +38,23 @@ class MaxAndSkipEnv(gym.Wrapper):
         self._skip = skip
 
     def step(self, action): # 对于一个动作, 执行4帧, 取最近的两帧中较大的像素作为观测
-        total_reward = 0.0
-        done = None
+        obs, total_reward, done, trunc, info = self.env.step(action)
         for _ in range(self._skip):
-            obs, reward, done, info = self.env.step(action)
+            obs, reward, done, trunc, info = self.env.step(0)
             self._obs_buffer.append(obs)
             total_reward += reward
             if done:
                 break
         max_frame = np.max(np.stack(self._obs_buffer), axis=0)
-        return max_frame, total_reward, done, info
+        return max_frame, total_reward, done, trunc, info
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         """Clear past frame buffer and init. to first obs. from inner env."""
+        super().reset(seed=seed)
         self._obs_buffer.clear()
-        obs, _ = self.env.reset()
+        obs, info = self.env.reset()
         self._obs_buffer.append(obs)
-        return obs
+        return obs, info
 
 class ProcessFrame84(gym.ObservationWrapper):
     def __init__(self, env=None):
@@ -63,8 +66,9 @@ class ProcessFrame84(gym.ObservationWrapper):
 
     @staticmethod
     def process(frame): # 将图像大小转为1*84*84
+        global cnt
         frame = frame.transpose(2, 1, 0) # WHC -> CHW
-
+        writer.add_image("origin", frame, global_step=cnt)
         if frame.size == 288 * 512 * 3:
             img = frame.astype(np.float32)
         else:
@@ -76,7 +80,25 @@ class ProcessFrame84(gym.ObservationWrapper):
         resized_screen = cv2.resize(img, (84, 110), interpolation=cv2.INTER_AREA)
         x_t = resized_screen[:84, :]
         x_t = np.reshape(x_t, [1, x_t.shape[0], x_t.shape[1]])
+        writer.add_image("process", x_t, global_step=cnt)
+        cnt += 1
         return x_t.astype(np.uint8)
+
+class ProcessFrame80(gym.ObservationWrapper):
+    def __init__(self, env=None):
+        super(ProcessFrame80, self).__init__(env)
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(1, 80, 80), dtype=np.uint8)
+
+    def observation(self, obs):
+        return ProcessFrame80.process(obs)
+
+    @staticmethod
+    def process(frame): # 将图像大小转为1*80*80
+        writer.add_image("origin image", frame.transpose(2, 1, 0))
+        observation = cv2.cvtColor(cv2.resize(frame, (80, 80)), cv2.COLOR_BGR2GRAY)
+        ret, observation = cv2.threshold(observation, 1, 255, cv2.THRESH_BINARY)
+        writer.add_image("process image", observation.reshape((1, 80, 80)))
+        return np.reshape(observation, (1, 80, 80))
 
 
 
@@ -100,7 +122,7 @@ class BufferWrapper(gym.ObservationWrapper):
         self.buffer = np.zeros_like(self.observation_space.low)
 
     def reset(self, seed=None, options=None):
-        super().reset(seed=seed)
+        super().reset(seed=seed, options=options)
         self.buffer = np.zeros_like(self.observation_space.low)
         obse, _ = self.env.reset()
         return self.observation(obse), _
@@ -116,6 +138,8 @@ def make_env(env_name):
     # env = MaxAndSkipEnv(env)
     # env = FireResetEnv(env)
     env = ProcessFrame84(env)
+    # env = ProcessFrame80(env)
     # env = ImageToPyTorch(env)
     env = BufferWrapper(env, 4)
+
     return ScaledFloatFrame(env)

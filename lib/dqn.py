@@ -14,8 +14,6 @@ GAME = 'Flappy Bird'
 # REPLAY_MOMORY = 50000
 # BATCH = 32
 
-
-
 class DQN(nn.Module):
     def __init__(self, input_shape, n_actions):
         super(DQN, self).__init__()
