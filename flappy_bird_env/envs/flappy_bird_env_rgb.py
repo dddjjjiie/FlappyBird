@@ -116,12 +116,12 @@ class FlappyBirdEnvRGB(gym.Env):
 
         obs = self._get_observation()
 
-        reward = 0.001
+        reward = 0.1
 
         done = not alive
 
         if done:
-            reward = -10
+            reward = -1
         elif score > 0:
             reward = 1
 

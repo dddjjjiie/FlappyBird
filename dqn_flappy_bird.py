@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import gymnasium as gym
+from torch.optim import RMSprop
 from torch.utils.tensorboard import SummaryWriter
 from lib import wrappers
 from lib import dqn
@@ -17,16 +18,16 @@ from flappy_bird_env.envs.flappy_bird_env_rgb import FlappyBirdEnvRGB
 DEFAULT_ENV_NAME = "flappy_bird_env:FlappyBird-rgb-v0"
 MEAN_REWARD_BOUND = 1000
 
-GAMMA = 0.99
+GAMMA = 0.95
 BATCH_SIZE = 32
-REPLAY_SIZE = 10000
-LEARNING_RATE = 1e-4
+REPLAY_SIZE = 20000
+LEARNING_RATE = 1e-6
 SYNC_TARGET_FRAMES = 1000
-REPLAY_START_SIZE = 10000
+REPLAY_START_SIZE = 3000
 
-EPSILON_DECAY_LAST_FRAME = 5*10**5
+EPSILON_DECAY_LAST_FRAME = 6*10**5
 EPSILON_START = 1.0
-EPSILON_FINAL = 0.01
+EPSILON_FINAL = 0.1
 
 Experience = collections.namedtuple('Experience', field_names=['state', 'action', 'reward', 'done', 'new_state'])
 
@@ -98,7 +99,6 @@ def calc_loss(batch, net, tgt_net, device="cpu"):
     expected_state_action_values = next_state_values * GAMMA + rewards_v
     return nn.MSELoss()(state_action_values, expected_state_action_values)
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default=DEFAULT_ENV_NAME,
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     agent = Agent(env, buffer)
     epsilon = EPSILON_START
 
-    optimizer = optim.Adam(net.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.RMSprop(net.parameters(), lr=LEARNING_RATE, weight_decay=0.9, momentum=0.95)
     total_rewards = []
 
     frame_idx = 0  # 当前帧的索引
