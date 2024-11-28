@@ -106,7 +106,7 @@ if __name__ == "__main__":
                         help="Mean reward boundary for stop of training, default=%.2f" % MEAN_REWARD_BOUND)
     args = parser.parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+    print("device:", device)
     env = wrappers.make_env(args.env)
     observation, _ = env.reset()
 
