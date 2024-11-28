@@ -68,17 +68,17 @@ class Agent:
             action = int(act_v.item())
 
         # do step in the environment
-        new_state, reward, is_done, _, _ = self.env.step(action)
+        new_state, reward, is_done, _, info = self.env.step(action)
         self.total_reward += reward
 
         exp = Experience(self.state, action, reward, is_done, new_state)
         self.exp_buffer.append(exp)
         self.state = new_state
-        # self.env.render()
+        self.env.render()
         if is_done:
             done_reward = self.total_reward
             self._reset()
-        return done_reward
+        return done_reward, info['score']
 
 
 def calc_loss(batch, net, tgt_net, device="cpu"):
@@ -132,7 +132,7 @@ if __name__ == "__main__":
     while True:
         frame_idx += 1
         epsilon = max(EPSILON_FINAL, EPSILON_START - frame_idx / EPSILON_DECAY_LAST_FRAME)
-        reward = agent.play_step(net, epsilon, device=device)
+        reward, score = agent.play_step(net, epsilon, device=device)
 
         if reward is not None: # 一个episode
             total_rewards.append(reward)
@@ -140,14 +140,15 @@ if __name__ == "__main__":
             ts_frame = frame_idx
             ts = time.time()
             mean_reward = np.mean(total_rewards[-100:])
-            print("%d: done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s" % (
+            print("%d: done %d games, mean reward %.3f, eps %.2f, speed %.2f f/s, score: %.2f" % (
                 frame_idx, len(total_rewards), mean_reward, epsilon,
-                speed
+                speed, score
             ))
             writer.add_scalar("epsilon", epsilon, frame_idx)
             writer.add_scalar("speed", speed, frame_idx)
             writer.add_scalar("reward_100", mean_reward, frame_idx)
             writer.add_scalar("reward", reward, frame_idx)
+            writer.add_scalar("score", score, len(total_rewards))
             if best_mean_reward is None or best_mean_reward < mean_reward:
                 torch.save(net.state_dict(), args.env + "-best.dat")
                 if best_mean_reward is not None:

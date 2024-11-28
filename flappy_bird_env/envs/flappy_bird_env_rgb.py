@@ -89,7 +89,7 @@ class FlappyBirdEnvRGB(gym.Env):
 
         self._renderer.game = self._game
 
-        return self._get_observation(), {}
+        return self._get_observation(), {'score:': self._game.score}
 
     def step(self,
              action: Union[FlappyBirdLogic.Actions, int],

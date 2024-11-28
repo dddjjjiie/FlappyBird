@@ -124,8 +124,8 @@ class BufferWrapper(gym.ObservationWrapper):
     def reset(self, seed=None, options=None):
         super().reset(seed=seed, options=options)
         self.buffer = np.zeros_like(self.observation_space.low)
-        obse, _ = self.env.reset()
-        return self.observation(obse), _
+        obse, info = self.env.reset()
+        return self.observation(obse), info
 
     def observation(self, obse):
         self.buffer[:-1] = self.buffer[1:]
