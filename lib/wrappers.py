@@ -3,11 +3,8 @@ import gymnasium as gym
 import numpy as np
 import collections
 
-from torch.utils.tensorboard import SummaryWriter
-
 from flappy_bird_env.envs.flappy_bird_env_rgb import FlappyBirdEnvRGB
-writer = SummaryWriter()
-cnt = 0
+
 class FireResetEnv(gym.Wrapper):
     def __init__(self, env=None):
         """For environments where the user need to press FIRE for the game to start."""
@@ -68,7 +65,6 @@ class ProcessFrame84(gym.ObservationWrapper):
     def process(frame): # 将图像大小转为1*84*84
         global cnt
         frame = frame.transpose(2, 1, 0) # WHC -> CHW
-        writer.add_image("origin", frame, global_step=cnt)
         if frame.size == 288 * 512 * 3:
             img = frame.astype(np.float32)
         else:
@@ -80,8 +76,6 @@ class ProcessFrame84(gym.ObservationWrapper):
         resized_screen = cv2.resize(img, (84, 110), interpolation=cv2.INTER_AREA)
         x_t = resized_screen[:84, :]
         x_t = np.reshape(x_t, [1, x_t.shape[0], x_t.shape[1]])
-        writer.add_image("process", x_t, global_step=cnt)
-        cnt += 1
         return x_t.astype(np.uint8)
 
 class ProcessFrame80(gym.ObservationWrapper):
@@ -94,10 +88,8 @@ class ProcessFrame80(gym.ObservationWrapper):
 
     @staticmethod
     def process(frame): # 将图像大小转为1*80*80
-        writer.add_image("origin image", frame.transpose(2, 1, 0))
         observation = cv2.cvtColor(cv2.resize(frame, (80, 80)), cv2.COLOR_BGR2GRAY)
         ret, observation = cv2.threshold(observation, 1, 255, cv2.THRESH_BINARY)
-        writer.add_image("process image", observation.reshape((1, 80, 80)))
         return np.reshape(observation, (1, 80, 80))
 
 

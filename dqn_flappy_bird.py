@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+import os
 import time
 import numpy as np
 import collections
@@ -74,7 +75,7 @@ class Agent:
         exp = Experience(self.state, action, reward, is_done, new_state)
         self.exp_buffer.append(exp)
         self.state = new_state
-        self.env.render()
+        # self.env.render()
         if is_done:
             done_reward = self.total_reward
             self._reset()
@@ -113,6 +114,11 @@ if __name__ == "__main__":
 
     net = dqn.DQN(env.observation_space.shape, env.action_space.n).to(device)
     tgt_net = dqn.DQN(env.observation_space.shape, env.action_space.n).to(device)
+
+    if os.path.exists("flappy_bird_env:FlappyBird-rgb-v0-best.dat"):
+        print("load model param")
+        net.load_state_dict(torch.load("flappy_bird_env:FlappyBird-rgb-v0-best.dat"))
+        tgt_net.load_state_dict(torch.load("flappy_bird_env:FlappyBird-rgb-v0-best.dat"))
 
     print(net)
 

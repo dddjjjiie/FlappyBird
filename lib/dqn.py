@@ -1,4 +1,3 @@
-import collections
 
 from torch import nn
 import torch
